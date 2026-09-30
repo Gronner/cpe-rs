@@ -78,6 +78,10 @@ impl<'a> Component<'a> {
         parse_uri_attribute(value)
     }
 
+    pub fn parse_fsb_field(value: &'a str) -> Result<Self> {
+        parse_fsb_attribute(value)
+    }
+
     pub fn to_owned(&self) -> OwnedComponent {
         self.into()
     }
@@ -88,6 +92,10 @@ impl<'a> Component<'a> {
 
     pub fn encode_wfn(&'a self) -> Cow<'a, str> {
         crate::parse::encode_wfn_attribute(self)
+    }
+
+    pub fn encode_fsb(&'a self) -> Cow<'a, str> {
+        crate::parse::encode_fsb_attribute(self)
     }
 }
 
