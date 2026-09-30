@@ -17,6 +17,7 @@ percent-encoding = "2.1"
 derive_builder = "0.9"
 regex = "1.4"
 lazy_static = "1.4"
+fancy-regex = "0.19.2"
 
 [features]
 default = ["display"]
