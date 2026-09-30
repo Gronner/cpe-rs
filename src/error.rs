@@ -56,4 +56,8 @@ pub enum CpeError {
     DuplicateAttribute { value: String, name: &'static str },
     #[error("Invalid attribute value `{value}`")]
     InvalidAttribute { value: String },
+    #[error("Invalid FSB `{value}`: {reason}")]
+    InvalidFsb { value: String, reason: &'static str },
+    #[error(transparent)]
+    RegexRuntimeError(#[from] fancy_regex::Error),
 }

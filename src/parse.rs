@@ -30,6 +30,10 @@ pub fn parse_wfn_attribute(value: &str) -> Result<Component<'_>> {
     }
 }
 
+pub fn validate_fsb_attribute(value: &str) -> bool {
+    FSB_REGEX.is_match(value)
+}
+
 #[cfg(not(feature = "permissive_encoding"))]
 pub fn validate_uri_attribute(value: &str) -> bool {
     URI_REGEX.is_match(value)
@@ -183,7 +187,6 @@ static WFN_ENCODE_REPLACE: LazyLock<Regex> =
 static PERMISSIVE_URI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^(?:(?:%01)+|%02)?(?:[\w\-._+]|(:?\\?(?:\+|!))?|%(?:2[1-9a-f]|3[a-f]|[46]0|[57][b-e]))*(?:(?:%01)+|%02)?$").unwrap()
 });
-
 static URI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
         r"^(?:(?:%01)+|%02)?(?:[\w\-._+]|(:?\\?(?:\+|!))?|%(?:2[1-9a-f]|3[a-f]|[46]0|[57][b-e]))*(?:(?:%01)+|%02)?$"
@@ -191,11 +194,37 @@ static URI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
+static FSB_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r##"^(?:(?:(?:\?)+|\*)?(?:[[:alnum:]\-\._]|\\[\\?*!"#$%&'()+,\/:;<=>@\[\]^`{|}~])+(?:(?:\?)+|\*)?|[\*\-])$"##).unwrap()
+});
+
+pub fn encode_fsb_attribute<'a>(value: &'a Component<'a>) -> Cow<'a, str> {
+    match value {
+        Component::Any => Cow::Borrowed("*"),
+        Component::NotApplicable => Cow::Borrowed("-"),
+        Component::Value(val) => val.clone(),
+    }
+}
+
+pub fn parse_fsb_attribute(value: &str) -> Result<Component<'_>> {
+    if value == "*" {
+        Ok(Component::Any)
+    } else if value == "-" {
+        Ok(Component::NotApplicable)
+    } else if validate_fsb_attribute(value) {
+        Ok(Component::Value(Cow::Borrowed(value)))
+    } else {
+        Err(CpeError::InvalidAttribute {
+            value: value.to_owned(),
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
 
-    macro_rules! ok_av_re {
+    macro_rules! ok_wfn_av_re {
         ($val:expr) => {
             let res = parse_wfn_attribute($val).unwrap();
             assert_eq!(res, Component::Value(Cow::Borrowed($val)))
@@ -217,7 +246,7 @@ mod test {
         };
     }
 
-    macro_rules! err_av_re {
+    macro_rules! err_wfn_av_re {
         ($val:expr) => {
             assert!(!validate_wfn_attribute($val));
         };
@@ -225,42 +254,42 @@ mod test {
 
     #[test]
     fn wfn_re() {
-        ok_av_re!(r"foo\-bar", "foo-bar");
-        ok_av_re!("Acrobat_Reader");
-        ok_av_re!(r#"\"oh_my\!\""#, r#""oh_my!""#);
-        ok_av_re!(r#"g\+\+"#, "g++");
-        ok_av_re!(r#"9\.?"#, "9.?");
-        ok_av_re!("sr*");
-        ok_av_re!(r"big\$money", "big$money");
-        ok_av_re!(r"foo\:bar", "foo:bar");
-        ok_av_re!(r"back\\slash_software", r"back\slash_software");
-        ok_av_re!(r"with_quoted\~tilde", "with_quoted~tilde");
-        ok_av_re!("*SOFT*");
-        ok_av_re!(r"8\.??", "8.??");
-        ok_av_re!(r"*8\.??", "*8.??");
-        ok_av_re!("ANY", ANY);
-        ok_av_re!("NA", NA);
+        ok_wfn_av_re!(r"foo\-bar", "foo-bar");
+        ok_wfn_av_re!("Acrobat_Reader");
+        ok_wfn_av_re!(r#"\"oh_my\!\""#, r#""oh_my!""#);
+        ok_wfn_av_re!(r#"g\+\+"#, "g++");
+        ok_wfn_av_re!(r#"9\.?"#, "9.?");
+        ok_wfn_av_re!("sr*");
+        ok_wfn_av_re!(r"big\$money", "big$money");
+        ok_wfn_av_re!(r"foo\:bar", "foo:bar");
+        ok_wfn_av_re!(r"back\\slash_software", r"back\slash_software");
+        ok_wfn_av_re!(r"with_quoted\~tilde", "with_quoted~tilde");
+        ok_wfn_av_re!("*SOFT*");
+        ok_wfn_av_re!(r"8\.??", "8.??");
+        ok_wfn_av_re!(r"*8\.??", "*8.??");
+        ok_wfn_av_re!("ANY", ANY);
+        ok_wfn_av_re!("NA", NA);
     }
 
     #[test]
-    fn re_failures() {
-        err_av_re!("foo\"");
-        err_av_re!(r"foo-bar");
-        err_av_re!("Acrobat Reader");
-        err_av_re!(r#""oh_my\!""#);
-        err_av_re!(r#"\"oh_my!\""#);
-        err_av_re!(r#"g++"#);
-        err_av_re!(r#"9.?"#);
-        err_av_re!(r"big$money");
-        err_av_re!(r"foo:bar");
-        err_av_re!(r"back\slack_software");
-        err_av_re!(r"with_quoted~tidle");
-        err_av_re!(r"8.??");
-        err_av_re!(r"8\.?*");
-        err_av_re!(r"8\.**");
-        err_av_re!(r"8\.*?");
-        err_av_re!("*");
-        err_av_re!(r"\-");
+    fn wfn_re_failures() {
+        err_wfn_av_re!("foo\"");
+        err_wfn_av_re!(r"foo-bar");
+        err_wfn_av_re!("Acrobat Reader");
+        err_wfn_av_re!(r#""oh_my\!""#);
+        err_wfn_av_re!(r#"\"oh_my!\""#);
+        err_wfn_av_re!(r#"g++"#);
+        err_wfn_av_re!(r#"9.?"#);
+        err_wfn_av_re!(r"big$money");
+        err_wfn_av_re!(r"foo:bar");
+        err_wfn_av_re!(r"back\slack_software");
+        err_wfn_av_re!(r"with_quoted~tidle");
+        err_wfn_av_re!(r"8.??");
+        err_wfn_av_re!(r"8\.?*");
+        err_wfn_av_re!(r"8\.**");
+        err_wfn_av_re!(r"8\.*?");
+        err_wfn_av_re!("*");
+        err_wfn_av_re!(r"\-");
     }
 
     macro_rules! ok_uri_re {
@@ -343,5 +372,69 @@ mod test {
         );
         assert!(parse_packed_uri_attribute("a~b~c~d~e").is_err());
         assert!(parse_packed_uri_attribute("~a~b~c~d~e~").is_err());
+    }
+
+    macro_rules! ok_fsb_av_re {
+        ($val:expr) => {
+            let res = parse_fsb_attribute($val).unwrap();
+            assert_eq!(res, Component::Value(Cow::Borrowed($val)))
+        };
+        ($val:expr, ANY) => {
+            let res = parse_fsb_attribute($val).unwrap();
+            assert_eq!(res, Component::Any)
+        };
+        ($val:expr, NA) => {
+            let res = parse_fsb_attribute($val).unwrap();
+            assert_eq!(res, Component::NotApplicable)
+        };
+        ($val:expr, $exp:literal) => {
+            let res = parse_fsb_attribute($val).unwrap();
+            assert_eq!(
+                res,
+                Component::Value(std::borrow::Cow::Owned($exp.to_owned()))
+            )
+        };
+    }
+
+    macro_rules! err_fsb_av_re {
+        ($val:expr) => {
+            assert!(!validate_fsb_attribute($val));
+        };
+    }
+
+    #[test]
+    fn fsb_re() {
+        ok_fsb_av_re!(r"foo-bar", "foo-bar");
+        ok_fsb_av_re!("Acrobat_Reader");
+        ok_fsb_av_re!(r#"\"oh_my\!\""#, r#"\"oh_my\!\""#);
+        ok_fsb_av_re!(r#"g\+\+"#, r"g\+\+");
+        ok_fsb_av_re!(r#"9.?"#, "9.?");
+        ok_fsb_av_re!("sr*");
+        ok_fsb_av_re!(r"big\$money", r"big\$money");
+        ok_fsb_av_re!(r"foo\:bar", r"foo\:bar");
+        ok_fsb_av_re!(r"back\\slash_software", r"back\\slash_software");
+        ok_fsb_av_re!(r"foo\\bar", r"foo\\bar");
+        ok_fsb_av_re!(r"with_quoted\~tilde", r"with_quoted\~tilde");
+        ok_fsb_av_re!("*SOFT*");
+        ok_fsb_av_re!(r"8.\?\?", r"8.\?\?");
+        ok_fsb_av_re!(r"*8.??", "*8.??");
+        ok_fsb_av_re!("*", ANY);
+        ok_fsb_av_re!("-", NA);
+    }
+
+    #[test]
+    fn fsb_re_failures() {
+        err_fsb_av_re!("Acrobat Reader");
+        err_fsb_av_re!(r#""oh_my\!""#);
+        err_fsb_av_re!(r#"\"oh_my!\""#);
+        err_fsb_av_re!(r#"g++"#);
+        err_fsb_av_re!(r"big$money");
+        err_fsb_av_re!(r"foo:bar");
+        err_fsb_av_re!(r"back\slack_software");
+        err_fsb_av_re!(r"with_quoted~tidle");
+        err_fsb_av_re!(r"8\.?*");
+        err_fsb_av_re!(r"8\.**");
+        err_fsb_av_re!(r"8\.*?");
+        err_fsb_av_re!(r"\-");
     }
 }

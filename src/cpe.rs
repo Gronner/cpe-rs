@@ -3,6 +3,7 @@ use language_tags::LanguageTag;
 
 use crate::component::Component;
 use crate::error::{CpeError, Result};
+use crate::fsb::{Fsb, OwnedFsb};
 use crate::uri::*;
 use crate::wfn::*;
 
@@ -11,7 +12,7 @@ use std::str::FromStr;
 
 /// CPE Language value
 ///
-/// May be "ANY", or a valid RFC-5646 language tag.
+/// May be "ANY", "*", or a valid RFC-5646 language tag.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub enum Language {
     #[default]
@@ -22,7 +23,7 @@ pub enum Language {
 impl FromStr for Language {
     type Err = CpeError;
     fn from_str(s: &str) -> Result<Self> {
-        if s == "ANY" {
+        if s == "ANY" || s == "*" {
             Ok(Self::Any)
         } else {
             Ok(Self::Language(s.parse()?))
@@ -144,8 +145,10 @@ macro_rules! impl_cpe {
 
 impl_cpe!(OwnedUri);
 impl_cpe!(OwnedWfn);
+impl_cpe!(OwnedFsb);
 impl_cpe!(Uri<'_>, 'a);
 impl_cpe!(Wfn<'_>, 'a);
+impl_cpe!(Fsb<'_>, 'a);
 
 /// A CPE Type Component
 ///
@@ -174,6 +177,7 @@ impl TryFrom<&str> for CpeType {
     fn try_from(val: &str) -> Result<Self> {
         Ok(match val {
             "ANY" => Self::Any,
+            "*" => Self::Any,
             "h" => Self::Hardware,
             "o" => Self::OperatingSystem,
             "a" => Self::Application,
