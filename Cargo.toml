@@ -8,7 +8,7 @@ keywords = ["cpe"]
 description = "CPE 2.2 and 2.3 handling in Rust"
 repository = "https://github.com/KenDJohnson/cpe-rs"
 documentation = "https://docs.rs/cpe"
-rust-version = "1.65"
+rust-version = "1.80"
 
 [dependencies]
 thiserror = "1.0"
@@ -16,7 +16,6 @@ language-tags = "0.3"
 percent-encoding = "2.1"
 derive_builder = "0.9"
 regex = "1.4"
-lazy_static = "1.4"
 fancy-regex = "0.19.2"
 
 [features]
