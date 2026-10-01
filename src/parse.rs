@@ -7,8 +7,8 @@ use crate::component::{Component, PackedComponents};
 use crate::error::{CpeError, Result};
 
 use std::borrow::Cow;
+use std::sync::LazyLock;
 
-use lazy_static::lazy_static;
 use regex::Regex;
 
 pub fn validate_wfn_attribute(value: &str) -> bool {
@@ -156,37 +156,40 @@ pub fn parse_packed_uri_attribute(value: &str) -> Result<PackedComponents<'_>> {
     }
 }
 
-lazy_static! {
-    static ref WFN_REGEX: Regex = {
-        Regex::new(concat!(
-            "^(?:",                                                                 // top group
-                "(?:",                                                              // body group
-                    "(?:",                                                          // body group 1
-                        r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~?*])"##,        // body1
-                        r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])*"##,     // body2
-                    ")",                                                            // close body group 1
-                    r##"|(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*]){2,}"##,     // or 2*body
-                ")",                                                                // close body group
-                r"|(?:(?:\?{1,}|\*)",                                               // or spec_chrs
-                r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])*)"##,            // body2
-            ")",                                                                    // close top group
-            r"(?:\?{1,}|\*)?$",                                                     // optional special
-        )).unwrap()
-    };
+static WFN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(concat!(
+        "^(?:",                                                     // top group
+        "(?:",                                                      // body group
+        "(?:",                                                      // body group 1
+        r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~?*])"##,        // body1
+        r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])*"##,     // body2
+        ")",                                                        // close body group 1
+        r##"|(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*]){2,}"##, // or 2*body
+        ")",                                                        // close body group
+        r"|(?:(?:\?{1,}|\*)",                                       // or spec_chrs
+        r##"(?:\w|\\[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])*)"##,    // body2
+        ")",                                                        // close top group
+        r"(?:\?{1,}|\*)?$",                                         // optional special
+    ))
+    .unwrap()
+});
 
-    static ref WFN_REPLACE: Regex = Regex::new(r##"\\(?P<esc>[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])"##).unwrap();
+static WFN_REPLACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r##"\\(?P<esc>[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])"##).unwrap());
+static WFN_ENCODE_REPLACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r##"(?P<esc>[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])"##).unwrap());
 
-    static ref WFN_ENCODE_REPLACE: Regex = Regex::new(r##"(?P<esc>[\\!"#$%&'()+,./:;<=>@\[\]^`{|}~\-?*])"##).unwrap();
+#[cfg(feature = "permissive_encoding")]
+static PERMISSIVE_URI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?:(?:%01)+|%02)?(?:[\w\-._+]|(:?\\?(?:\+|!))?|%(?:2[1-9a-f]|3[a-f]|[46]0|[57][b-e]))*(?:(?:%01)+|%02)?$").unwrap()
+});
 
-
-    static ref PERMISSIVE_URI_REGEX: Regex = Regex::new(concat!(
+static URI_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
         r"^(?:(?:%01)+|%02)?(?:[\w\-._+]|(:?\\?(?:\+|!))?|%(?:2[1-9a-f]|3[a-f]|[46]0|[57][b-e]))*(?:(?:%01)+|%02)?$"
-    )).unwrap();
-
-    static ref URI_REGEX: Regex = Regex::new(concat!(
-        r"^(?:(?:%01)+|%02)?(?:[\w\-._]|%(?:2[1-9a-f]|3[a-f]|[46]0|[57][b-e]))*(?:(?:%01)+|%02)?$"
-    )).unwrap();
-}
+    )
+    .unwrap()
+});
 
 #[cfg(test)]
 mod test {
