@@ -113,7 +113,7 @@ impl OwnedComponent {
         Component::parse_uri_field(value).map(|component| component.into())
     }
 
-    pub fn as_component(&self) -> Component {
+    pub fn as_component(&self) -> Component<'_> {
         match self {
             Self::Any => Component::Any,
             Self::NotApplicable => Component::NotApplicable,

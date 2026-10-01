@@ -15,7 +15,7 @@ pub fn validate_wfn_attribute(value: &str) -> bool {
     value != "*" && WFN_REGEX.is_match(value)
 }
 
-pub fn parse_wfn_attribute(value: &str) -> Result<Component> {
+pub fn parse_wfn_attribute(value: &str) -> Result<Component<'_>> {
     if value == "ANY" {
         Ok(Component::Any)
     } else if value == "NA" {
@@ -97,7 +97,7 @@ pub fn encode_uri_attribute<'a>(value: &'a Component<'a>) -> Cow<'a, str> {
     }
 }
 
-pub fn parse_uri_attribute(value: &str) -> Result<Component> {
+pub fn parse_uri_attribute(value: &str) -> Result<Component<'_>> {
     if value.is_empty() {
         Ok(Component::Any)
     } else if value == "-" {
@@ -128,7 +128,7 @@ pub fn parse_uri_attribute(value: &str) -> Result<Component> {
     }
 }
 
-pub fn parse_packed_uri_attribute(value: &str) -> Result<PackedComponents> {
+pub fn parse_packed_uri_attribute(value: &str) -> Result<PackedComponents<'_>> {
     if value.starts_with('~') {
         let parts = value.split('~').collect::<Vec<_>>();
         if parts.len() != 6 {

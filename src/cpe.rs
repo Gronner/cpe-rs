@@ -53,16 +53,16 @@ impl fmt::Display for Language {
 /// required decoding, using this trait may result in a string clone.
 pub trait Cpe {
     fn part(&self) -> CpeType;
-    fn vendor(&self) -> Component;
-    fn product(&self) -> Component;
-    fn version(&self) -> Component;
-    fn update(&self) -> Component;
-    fn edition(&self) -> Component;
+    fn vendor(&self) -> Component<'_>;
+    fn product(&self) -> Component<'_>;
+    fn version(&self) -> Component<'_>;
+    fn update(&self) -> Component<'_>;
+    fn edition(&self) -> Component<'_>;
     fn language(&self) -> &Language;
-    fn sw_edition(&self) -> Component;
-    fn target_sw(&self) -> Component;
-    fn target_hw(&self) -> Component;
-    fn other(&self) -> Component;
+    fn sw_edition(&self) -> Component<'_>;
+    fn target_sw(&self) -> Component<'_>;
+    fn target_hw(&self) -> Component<'_>;
+    fn other(&self) -> Component<'_>;
 }
 
 macro_rules! impl_cpe {
@@ -71,34 +71,34 @@ macro_rules! impl_cpe {
             fn part(&self) -> CpeType {
                 self.part
             }
-            fn vendor(&self) -> Component {
+            fn vendor(&self) -> Component<'_> {
                 self.vendor.as_component()
             }
-            fn product(&self) -> Component {
+            fn product(&self) -> Component<'_> {
                 self.product.as_component()
             }
-            fn version(&self) -> Component {
+            fn version(&self) -> Component<'_> {
                 self.version.as_component()
             }
-            fn update(&self) -> Component {
+            fn update(&self) -> Component<'_> {
                 self.update.as_component()
             }
-            fn edition(&self) -> Component {
+            fn edition(&self) -> Component<'_> {
                 self.edition.as_component()
             }
             fn language(&self) -> &Language {
                 &self.language
             }
-            fn sw_edition(&self) -> Component {
+            fn sw_edition(&self) -> Component<'_> {
                 self.sw_edition.as_component()
             }
-            fn target_sw(&self) -> Component {
+            fn target_sw(&self) -> Component<'_> {
                 self.target_sw.as_component()
             }
-            fn target_hw(&self) -> Component {
+            fn target_hw(&self) -> Component<'_> {
                 self.target_hw.as_component()
             }
-            fn other(&self) -> Component {
+            fn other(&self) -> Component<'_> {
                 self.other.as_component()
             }
         }
@@ -108,34 +108,34 @@ macro_rules! impl_cpe {
             fn part(&self) -> CpeType {
                 self.part
             }
-            fn vendor(&self) -> Component {
+            fn vendor(&self) -> Component<'_> {
                 self.vendor.clone()
             }
-            fn product(&self) -> Component {
+            fn product(&self) -> Component<'_> {
                 self.product.clone()
             }
-            fn version(&self) -> Component {
+            fn version(&self) -> Component<'_> {
                 self.version.clone()
             }
-            fn update(&self) -> Component {
+            fn update(&self) -> Component<'_> {
                 self.update.clone()
             }
-            fn edition(&self) -> Component {
+            fn edition(&self) -> Component<'_> {
                 self.edition.clone()
             }
             fn language(&self) -> &Language {
                 &self.language
             }
-            fn sw_edition(&self) -> Component {
+            fn sw_edition(&self) -> Component<'_> {
                 self.sw_edition.clone()
             }
-            fn target_sw(&self) -> Component {
+            fn target_sw(&self) -> Component<'_> {
                 self.target_sw.clone()
             }
-            fn target_hw(&self) -> Component {
+            fn target_hw(&self) -> Component<'_> {
                 self.target_hw.clone()
             }
-            fn other(&self) -> Component {
+            fn other(&self) -> Component<'_> {
                 self.other.clone()
             }
         }
