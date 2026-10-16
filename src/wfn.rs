@@ -8,7 +8,7 @@
 //!
 //! 1. Parsing a WFN string
 //! ```
-//! use cpe::wfn::Wfn;
+//! use cpe_rs_fork::wfn::Wfn;
 //!
 //! let cpe: Wfn = Wfn::parse(r#"wfn:[part="a",vendor="rust",product="cargo"]"#).unwrap();
 //! println!("{:?}", cpe);
@@ -16,7 +16,7 @@
 //! 2. Using the builder pattern, with [builder](#method.builder)
 //! 3. Using the "setter" methods
 //! ```
-//! use cpe::wfn::Wfn;
+//! use cpe_rs_fork::wfn::Wfn;
 //!
 //! let mut cpe: Wfn = Wfn::new();
 //! cpe.set_part("a").unwrap();
@@ -27,7 +27,7 @@
 //! ```
 //! 4. Using the `wfn!{}` macro
 //! ```
-//! use cpe::{wfn, wfn::Wfn};
+//! use cpe_rs_fork::{wfn, wfn::Wfn};
 //!
 //! let cpe: Wfn = wfn!{
 //!                   part: "a",
@@ -101,7 +101,7 @@ macro_rules! wfn {
 /// the components when `#` is used to specify an alternate.
 ///
 ///```
-/// use cpe::wfn::Wfn;
+/// use cpe_rs_fork::wfn::Wfn;
 /// let wfn = Wfn::builder()
 ///           .part("a")
 ///           .vendor("foo\\!")
@@ -114,7 +114,7 @@ macro_rules! wfn {
 ///
 /// Additionally, the `0` for zero-padding integers can be used to omit default "ANY" fields.
 ///```
-/// use cpe::wfn::Wfn;
+/// use cpe_rs_fork::wfn::Wfn;
 /// let wfn = Wfn::builder()
 ///           .part("a")
 ///           .vendor("foo\\!")
@@ -148,7 +148,7 @@ impl<'a> Wfn<'a> {
     /// Create a `CpeBuilder` struct to construct a new Wfn.
     ///
     /// ```
-    /// use cpe::wfn::Wfn;
+    /// use cpe_rs_fork::wfn::Wfn;
     ///
     /// let cpe: Wfn = Wfn::builder()
     ///               .part("a")

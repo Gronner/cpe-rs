@@ -99,17 +99,12 @@ impl<'a> Component<'a> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub enum OwnedComponent {
+    #[default]
     Any,
     NotApplicable,
     Value(String),
-}
-
-impl Default for OwnedComponent {
-    fn default() -> Self {
-        Self::Any
-    }
 }
 
 impl OwnedComponent {

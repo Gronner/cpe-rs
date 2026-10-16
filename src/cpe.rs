@@ -156,19 +156,14 @@ impl_cpe!(Fsb<'_>, 'a);
 /// * h - hardware
 /// * o - operating system
 /// * a - application
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CpeType {
+    #[default]
     Any,
     Hardware,
     OperatingSystem,
     Application,
     Empty,
-}
-
-impl Default for CpeType {
-    fn default() -> Self {
-        Self::Any
-    }
 }
 
 impl TryFrom<&str> for CpeType {

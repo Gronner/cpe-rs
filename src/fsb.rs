@@ -85,7 +85,7 @@ impl<'a> Fsb<'a> {
     /// Create a `CpeBuilder` struct to construct a new Wfn.
     ///
     /// ```
-    /// use cpe::fsb::Fsb;
+    /// use cpe_rs_fork::fsb::Fsb;
     ///
     /// let cpe: Fsb = Fsb::builder()
     ///               .part("a")
